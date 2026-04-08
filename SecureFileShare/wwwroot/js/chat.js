@@ -34,10 +34,19 @@ $(document).ready(function () {
             const recipientId = event.target.dataset.userId; // Get recipient ID from data attribute
             const recipientName = event.target.textContent; // Get recipient name from list item text
 
-            document.getElementById("chatWith").textContent = `{recipientName}`; // Update chat header
+            document.getElementById("chatWith").textContent = `${recipientName}`; // Update chat header
 
             window.currentRecipientId = recipientId; // Store current recipient ID for sending messages
 
+            if (!document.querySelector(`#chatUsers li[data-user-id="${recipientId}"]`)) {
+                const newUserLi = document.createElement("li");
+                newUserLi.dataset.userId = recipientId;
+                newUserLi.classList.add("chatUser");
+                newUserLi.textContent = `${recipientName}`;
+                document.getElementById("chatUsers").appendChild(newUserLi);
+            }
+
+            //Add chat history to the chat box
             $.get("/Chat/GetMessages", { recipientId: recipientId }, function (data) {
                 const messagesContainer = document.getElementById("messages");
                 messagesContainer.innerHTML = ""; // Clear old messages
@@ -67,13 +76,23 @@ $(document).ready(function () {
         .build();
 
     // Listen for incoming messages
-    connection.on("ReceiveMessage", (senderId, content, timestamp) => {
+    connection.on("ReceiveMessage", (senderId, senderName, content, timestamp) => {
         const currentUserId = document.getElementById("chats").dataset.userId;
         const chatWithId = window.currentRecipientId;
 
         const isFromCurrentRecipient = senderId === chatWithId;
         const isFromCurrentUser = senderId === currentUserId && chatWithId;
 
+        //Add sender to chal list if they are not there (new conversations)
+        if (senderId != currentUserId && !document.querySelector(`#chatUsers li[data-user-id="${senderId}"]`)) {
+            const newUserLi = document.createElement("li");
+            newUserLi.dataset.userId = senderId;
+            newUserLi.classList.add("chatUser");
+            newUserLi.textContent = senderName;
+            document.getElementById("chatUsers").appendChild(newUserLi);
+        }
+
+        //Only add new messages to the chat if they are from the currently involved users
         if (isFromCurrentRecipient || isFromCurrentUser) {
             const message = document.createElement("div");
 
@@ -92,8 +111,9 @@ $(document).ready(function () {
             document.getElementById("messages").appendChild(message);
         }
         else {
-            // Optionally, show a notification for messages from other users
-            alert("New message from " + senderId);
+            alert("New message from " + senderName);
+            const li = document.querySelector(`#chatUsers li[data-user-id="${senderId}"]`);
+            if (li) li.classList.add("unread");
         }
     });
 
@@ -106,6 +126,9 @@ $(document).ready(function () {
 
             const recipientId = event.target.dataset.userId; // Get recipient ID from data attribute
             const recipientName = event.target.textContent; // Get recipient name from list item text
+            if (event.target.classList.contains("unread")) {
+                event.target.classList.remove("unread");
+            }
 
             document.getElementById("chatWith").textContent = `${recipientName}`; // Update chat header
 

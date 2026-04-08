@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
+using SecureFileShare.Models;
 
 namespace SecureFileShare.Data.SignalR
 {
@@ -6,9 +8,11 @@ namespace SecureFileShare.Data.SignalR
     {
 
         private readonly SecureFileShareContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public chatHub(SecureFileShareContext context)
+        public chatHub(SecureFileShareContext context, UserManager<ApplicationUser> userManager)
         {
+            _userManager = userManager;
             _context = context;
         }
 
@@ -21,10 +25,19 @@ namespace SecureFileShare.Data.SignalR
                 Content = message,
                 Timestamp = DateTime.Now
             };
+
             _context.Messages.Add(newMessage);
             await _context.SaveChangesAsync();
-            await Clients.User(recipientId).SendAsync("ReceiveMessage", senderId, message, newMessage.Timestamp.ToString("o"));
-            await Clients.User(senderId).SendAsync("ReceiveMessage", senderId, message, newMessage.Timestamp.ToString("o"));
+
+            var sender = await _userManager.FindByIdAsync(senderId);
+            var recipient = await _userManager.FindByIdAsync(recipientId);
+
+            var senderName = $"{sender.FirstName} {sender.LastName}";
+            var recipientName = $"{recipient.FirstName} {recipient.LastName}";
+
+            
+            await Clients.User(recipientId).SendAsync("ReceiveMessage", senderId, senderName, message, newMessage.Timestamp.ToString("o"));
+            await Clients.User(senderId).SendAsync("ReceiveMessage", senderId, recipientName, message, newMessage.Timestamp.ToString("o"));
         }
 
     }

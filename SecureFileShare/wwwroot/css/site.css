@@ -186,3 +186,8 @@ td{
 /*    text-align: left;*/
 }
 
+.chatUser.unread{
+    color: aqua !important;
+    font-weight: bold !important;
+}
+
