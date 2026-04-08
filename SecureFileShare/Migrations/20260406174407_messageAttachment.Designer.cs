@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SecureFileShare.Data;
 
@@ -11,9 +12,11 @@ using SecureFileShare.Data;
 namespace SecureFileShare.Migrations
 {
     [DbContext(typeof(SecureFileShareContext))]
-    partial class SecureFileShareContextModelSnapshot : ModelSnapshot
+    [Migration("20260406174407_messageAttachment")]
+    partial class messageAttachment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -434,13 +437,13 @@ namespace SecureFileShare.Migrations
                     b.HasOne("SecureFileShare.Models.ApplicationUser", "Recipient")
                         .WithMany("ReceivedMessages")
                         .HasForeignKey("RecipientId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("SecureFileShare.Models.ApplicationUser", "Sender")
                         .WithMany("SentMessages")
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Recipient");

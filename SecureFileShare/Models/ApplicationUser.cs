@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SecureFileShare.Models
 {
@@ -11,8 +12,10 @@ namespace SecureFileShare.Models
         public string MfaSecretKey { get; set; } = string.Empty;
         public DateTime LastLoginDate { get; set; } = DateTime.UtcNow;
         public string LastLoginIp { get; set; } = string.Empty;
-        public ICollection<Message> SentMessages { get; set; } = new List<Message>();
-        public ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
+        [InverseProperty("Sender")]
+        public virtual ICollection<Message> SentMessages { get; set; } = new List<Message>();
+        [InverseProperty("Recipient")]
+        public virtual ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
 
     }
 }

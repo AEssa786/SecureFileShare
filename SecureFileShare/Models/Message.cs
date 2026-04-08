@@ -12,11 +12,11 @@ namespace SecureFileShare.Models
         [Required]
         public string RecipientId{ get; set; }
         public string Content { get; set; }
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public DateTime Timestamp { get; set; } = DateTime.Now;
         [ForeignKey("SenderId")]
-        public ApplicationUser Sender { get; set; }
+        public virtual ApplicationUser Sender { get; set; }
         [ForeignKey("RecipientId")]
-        public ApplicationUser Recipient { get; set; }
+        public virtual ApplicationUser Recipient { get; set; }
 
     }
 }

@@ -1,0 +1,58 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model List<ApplicationUser>
+@inject UserManager<ApplicationUser> UserManager
+
+<html lang="en">
+
+    <head>
+        <title>Chat - SecureFileShare</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="~/js/chat.js" asp-append-version="true"></script>
+        <link rel="stylesheet" href="~/css/site.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    </head>
+
+    <body>
+        <div id="chats" data-user-id="@UserManager.GetUserId(User)">
+            <h1>Chat</h1>
+
+            <div id="ChatBox">
+
+                <div id="chatList">
+                    <h3>Chats</h3>
+
+                    <div id="search">
+                        <input type="text" id="searchInput" placeholder="Search for users...">
+                        <ul id="searchResults"></ul>
+                    </div>
+
+                    <ul id="chatUsers">
+                    @foreach (var user in Model)
+                    {
+                        if (user.Id != UserManager.GetUserId(User))
+                        {
+                            <li data-user-id="@user.Id" class="chatUser">@user.FirstName @user.LastName</li>
+                        }
+                    }
+                    </ul>
+
+                </div>
+
+                <div id="chatWindow">
+                    <h3 id="chatWith">Messages</h3>
+                    <div id="messages"></div>
+                    <div id="sendDiv">
+                        <input type="text" id="messageInput" placeholder="Type a message..." >
+                        <button id="sendMessage">➡️</button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+   
+        
+    
+    </body>
+
+</html>
+

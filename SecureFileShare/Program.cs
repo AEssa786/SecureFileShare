@@ -21,7 +21,8 @@ namespace SecureFileShare
                 .AddEntityFrameworkStores<SecureFileShareContext>();
 
             builder.Services.AddControllersWithViews();
-
+            builder.Services.AddRazorPages();
+            builder.Services.AddSignalR();
             builder.Services.AddSession();
 
             var app = builder.Build();
@@ -38,6 +39,8 @@ namespace SecureFileShare
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.MapHub<Data.SignalR.chatHub>("/chatHub");
 
             app.Run();
         }
