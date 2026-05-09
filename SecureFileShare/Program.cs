@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SecureFileShare.Data;
+using SecureFileShare.Data.RepositoryPattern;
 using SecureFileShare.Models;
+using SecureFileShare.Services;
 
 namespace SecureFileShare
 {
@@ -12,13 +14,16 @@ namespace SecureFileShare
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            var connectionString = builder.Configuration.GetConnectionString("SecureFileShareContextConnection") ?? throw new InvalidOperationException("Connection string 'SecureFileShareContextConnection' not found.");
             builder.Services.AddDbContext<SecureFileShareContext>(options =>
                 options.UseSqlServer(connectionString));
 
             builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SecureFileShareContext>();
+
+            builder.Services.AddScoped<IRepository<Models.File>, FileRepo>();
+            builder.Services.AddScoped<IFileService, FileService>();
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
@@ -41,6 +46,21 @@ namespace SecureFileShare
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.MapHub<Data.SignalR.chatHub>("/chatHub");
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+                string[] roles = { "Admin", "User" };
+                foreach (var role in roles)
+                {
+                    if (!await roleMgr.RoleExistsAsync(role))
+                    {
+                        await roleMgr.CreateAsync(new IdentityRole(role));
+                    }
+                }
+            }
 
             app.Run();
         }

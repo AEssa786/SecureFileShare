@@ -1,6 +1,36 @@
-html {
-  font-size: 14px;
+:root {
+    --background-colour: #F6F6F6;
+    --primary-colour: #061E29;
+    --accent2: #9F7AEA;
+    --accent1: #2563EB;
+    --border-colour: #1C4D8D;
+    --button-background: #0F2854;
 }
+
+.nav-custom {
+    background-color: var(--accent1);
+}
+
+.brand-custom {
+    color: #E5E5E5;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.menu-custom {
+    color: #E5E5E5;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+    .menu-custom:hover, .brand-custom:hover {
+        color: var(--accent2);
+        transform: scale(1.2);
+    }
+
+    html {
+        font-size: 14px;
+    }
 
 @media (min-width: 768px) {
   html {
@@ -16,6 +46,45 @@ html {
   position: relative;
   min-height: 100%;
 }
+
+.home-content {
+    position: relative;
+    text-align: center;
+    margin: auto auto 0px auto;
+    width: fit-content;
+    height: fit-content;
+    padding: 20px;
+}
+
+.home-options {
+    text-align: center;
+    margin-top: 100px;
+    position: relative;
+    width: 700px;
+}
+
+    .home-options h2 {
+        color: #E5E5E5;
+    }
+    
+    .home-options a {
+        border: solid 3px black;
+        border-radius: 10px;
+        padding: 10px 15px;
+        background-color: var(--accent1);
+        text-decoration: none;
+        font-size: 20px;
+        display: inline-block;
+        margin-right: 20px;
+        margin-bottom: 20px;
+        width: 250px;
+        height: fit-content;
+    }
+
+        .home-options a:hover {
+            background-color: var(--accent2);
+            color: white;
+        }
 
 body {
     background-color: #121212;
@@ -191,3 +260,59 @@ td{
     font-weight: bold !important;
 }
 
+.clip {
+    cursor: pointer;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.fileBox {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .fileBox .popUp {
+        visibility: hidden;
+        position: absolute;
+        bottom: 150%;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        background-color: #9F7AEA;
+        border: 1px solid #A1A1A1;
+        border-radius: 5px;
+        padding: 10px;
+        z-index: 10;
+        min-width: 100px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+        .fileBox .popUp::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: #9F7AEA transparent transparent transparent;
+        }
+
+.popUp.show {
+    visibility: visible;
+    animation: fadeIn 0.3s;
+}
+
+@-webkit-keyframes fadeIn {
+    from {opacity: 0;} 
+    to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}

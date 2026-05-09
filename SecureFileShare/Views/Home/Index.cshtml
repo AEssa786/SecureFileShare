@@ -1,14 +1,47 @@
-﻿<html lang="en">
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+}
+
+<html lang="en">
     <head>
-        <title>Home - SecureFileShare</title>
+        <title>Home</title>
         <link rel="stylesheet" href="~/css/site.css" />
     </head>
 
     <body>
-        <div class="text-center">
-            <h1 class="display-4">Welcome</h1>
-            <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+    <div class="home-content">
+        <h1 class="display-4">Welcome to FileSec</h1>
+
+        <div class="home-options">
+            @if (user != null)
+            {
+                <h2>Where would you like to go?</h2>
+                <a asp-controller="File" asp-action="AllFiles">
+                    <img src="Assets/Images/folder.png" width="100"/>
+                    <h3>My Files</h3>
+                </a>
+                <a asp-controller="Chat" asp-action="Home">
+                    <img src="Assets/Images/chat (1).png" width="100" />
+                    <h3>My Chats</h3>
+                </a>
+            }
+            else
+            {
+                <h2>Please Login or Register to Continue</h2>
+                <a asp-area="Identity" asp-page="/Account/Login">
+                    <img src="Assets/Images/user.png" width="100" />
+                    <h3>Login</h3>
+                </a>
+                <a asp-area="Identity" asp-page="/Account/Register">
+                <img src="Assets/Images/add-user.png" width="100" />
+                    <h3>Register</h3>
+                </a>
+            }
         </div>
+    </div>
     </body>
 </html>
-

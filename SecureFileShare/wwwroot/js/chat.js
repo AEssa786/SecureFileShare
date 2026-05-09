@@ -181,3 +181,8 @@ $(document).ready(function () {
     });
 
 });
+
+function openPopUp() {
+    var popUp = document.getElementById("popUp");
+    popUp.classList.toggle("show");
+}

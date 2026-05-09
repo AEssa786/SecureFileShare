@@ -1,27 +1,32 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SecureFileShare.Data;
+using SecureFileShare.Data.RepositoryPattern;
 using SecureFileShare.Models;
+using SecureFileShare.Services;
+using System.Threading.Tasks;
 
 namespace SecureFileShare.Controllers
 {
     public class FileController : Controller
     {
 
-        private readonly SecureFileShareContext _context;
+        private readonly IRepository<Models.File> _fileRepository;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IFileService _fileService;
 
-        public FileController(SecureFileShareContext context, UserManager<ApplicationUser> userManager)
+        public FileController(IRepository<Models.File> fileRepository, UserManager<ApplicationUser> userManager, IFileService fileService)
         {
             _userManager = userManager;
-            _context = context;
+            _fileRepository = fileRepository;
+            _fileService = fileService;
         }
 
         [HttpGet]
-        public IActionResult AllFiles()
+        public async Task<IActionResult> AllFiles()
         {
             var userId = _userManager.GetUserId(User);
-            var files = _context.Files.Where(f => f.OwnerId == userId).ToList();
+            var files = await _fileRepository.getAllAsync(userId);
             return View(files);
         }
 
@@ -33,76 +38,53 @@ namespace SecureFileShare.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadFile(IFormFile file, string fileName)
         {
-            if (file != null && file.Length > 0)
+            if(!_fileService.fileCheck(file, fileName))
             {
-                var name = fileName + Path.GetExtension(file.FileName);
-                var filePath = Path.Combine("Data/Uploads/", name);
-
-                if (!Directory.Exists("Data/Uploads/"))
-                {
-                    Directory.CreateDirectory("Data/Uploads/");
-                }
-
-                if (file.Length > 11 * 1024 * 1024) // Limit file size to 10 MB
-                {
-                    ModelState.AddModelError(string.Empty, "File size exceeds the 10 MB limit.");
-                    return View("Upload");
-                }
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                var fileInfo = new FileInfo(filePath);
-
-                Models.File newFile = new Models.File
-                {
-                    FileName = name,
-                    FilePath = filePath,
-                    OwnerId = _userManager.GetUserId(User),
-                    Size = fileInfo.Length, // Size in Bytes
-                };
-
-                _context.Files.Add(newFile);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction("AllFiles");
+                ModelState.AddModelError(string.Empty, "Invalid file or file name. Please ensure you have selected a file and provided a valid name. The file size must not exceed 10 MB.");
+                return View("Upload");
             }
+
             else
             {
-                ModelState.AddModelError(string.Empty, "Please select a file to upload.");
-                return View("Upload");
+                var filePath = await _fileService.UploadFileAsync(file, fileName);
+
+                await _fileRepository.addAsync(new Models.File
+                {
+                    FileName = fileName + Path.GetExtension(file.FileName),
+                    FilePath = filePath,
+                    OwnerId = _userManager.GetUserId(User),
+                    Size = file.Length
+                });
+                return RedirectToAction("AllFiles");
             }
         }
 
         public async Task<IActionResult> Download(int id)
         {
-            var file = await _context.Files.FindAsync(id);
+            var file = _fileRepository.getByIdAsync(id).Result;
             if (file == null || file.OwnerId != _userManager.GetUserId(User))
             {
                 return NotFound();
             }
-            var memory = new MemoryStream();
-            using (var stream = new FileStream(file.FilePath, FileMode.Open))
-            {
-                await stream.CopyToAsync(memory);
+            
+            var fileStream = _fileService.DownloadFile(file);
+            if (fileStream == null) { 
+                return NotFound();
             }
-            memory.Position = 0;
-            return File(memory, "application/octet-stream", file.FileName);
+
+            return File(fileStream, "application/octet-stream", file.FileName);
         }
 
-        
+
         public async Task<IActionResult> Delete(int id)
         {
-            var file = await _context.Files.FindAsync(id);
+            var file = _fileRepository.getByIdAsync(id).Result;
             if (file == null || file.OwnerId != _userManager.GetUserId(User))
             {
                 return NotFound();
             }
-            System.IO.File.Delete(file.FilePath);
-            _context.Files.Remove(file);
-            await _context.SaveChangesAsync();
+            _fileService.DeleteFile(file.FilePath).Wait();
+            _fileRepository.deleteAsync(id).Wait();
             return RedirectToAction("AllFiles");
         }
 

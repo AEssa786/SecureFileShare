@@ -14,7 +14,7 @@ namespace SecureFileShare.Models
         public string OwnerId{ get; set; }
         public string FileName { get; set; }
         public string FilePath { get; set; }
-        public DateTime UploadDate { get; set; } = DateTime.UtcNow;
+        public DateTime UploadDate { get; set; } = DateTime.Now;
         public bool IsShared { get; set; } = false;
         [ForeignKey("OwnerId")]
         public ApplicationUser Owner { get; set; }
