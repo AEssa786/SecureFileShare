@@ -22,7 +22,9 @@ namespace SecureFileShare
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<SecureFileShareContext>();
 
-            builder.Services.AddScoped<IRepository<Models.File>, FileRepo>();
+            builder.Services.AddScoped<IFileRepository, FileRepo>();
+            builder.Services.AddScoped<IChatRepository, ChatRepo>();
+            builder.Services.AddScoped<IUserRepository, UserRepo>();
             builder.Services.AddScoped<IFileService, FileService>();
 
             builder.Services.AddControllersWithViews();

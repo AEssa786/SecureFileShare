@@ -10,10 +10,12 @@ $(document).ready(function () {
                 // Clear old results
                 $("#searchResults").empty();
 
+                // If there are no results, show a message
                 if (data.length === 0) {
                     $("#searchResults").append("<li>No users found.</li>");
                     return;
                 }
+                    //If there are results, add them to the list with data attributes for user ID
                 else {
                     data.forEach(user => {
                         $("#searchResults").append(
@@ -28,6 +30,7 @@ $(document).ready(function () {
         }
     });
 
+    // Make search results clickable and add the clicked user's ID as the recipient ID
     document.getElementById("searchResults").addEventListener("click", function (event) {
         if (event.target && event.target.nodeName === "LI") {
 
@@ -38,6 +41,7 @@ $(document).ready(function () {
 
             window.currentRecipientId = recipientId; // Store current recipient ID for sending messages
 
+            //Add recipient to chat list if not already there (new conversations)
             if (!document.querySelector(`#chatUsers li[data-user-id="${recipientId}"]`)) {
                 const newUserLi = document.createElement("li");
                 newUserLi.dataset.userId = recipientId;
@@ -50,6 +54,9 @@ $(document).ready(function () {
             $.get("/Chat/GetMessages", { recipientId: recipientId }, function (data) {
                 const messagesContainer = document.getElementById("messages");
                 messagesContainer.innerHTML = ""; // Clear old messages
+
+                // Add each message to the chat box, styling differently if it's from the current user or another user
+                // Also format the timestamp to only show hours and minutes
                 data.forEach(msg => {
                     const message = document.createElement("div");
                     if (msg.senderId === document.getElementById("chats").dataset.userId) {
@@ -171,6 +178,7 @@ $(document).ready(function () {
 
     });
 
+    // Send message on Enter key press
     document.getElementById("messageInput").addEventListener("keydown", function (event) {
 
         if (event.key === "Enter") {
@@ -182,6 +190,7 @@ $(document).ready(function () {
 
 });
 
+// Function to toggle the visibility of the pop-up
 function openPopUp() {
     var popUp = document.getElementById("popUp");
     popUp.classList.toggle("show");

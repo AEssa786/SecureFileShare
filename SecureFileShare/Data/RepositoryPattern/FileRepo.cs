@@ -1,27 +1,26 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using SecureFileShare.Models;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace SecureFileShare.Data.RepositoryPattern
 {
-    public class FileRepo : IRepository<Models.File>
+    public class FileRepo : IFileRepository
     {
 
         private readonly SecureFileShareContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
 
-        public FileRepo(SecureFileShareContext context, UserManager<ApplicationUser> userManager)
+
+        public FileRepo(SecureFileShareContext context)
         {
             _context = context;
-            _userManager = userManager;
         }
 
+        //Adding a file to the database, after the file is uploaded to the server so that there is a file path to save in the database
         public async Task addAsync(Models.File entity)
         {
             await _context.Files.AddAsync(entity);
             await _context.SaveChangesAsync();
         }
 
+        //Deleting a file from the database, after the file is deleted from the server so that there is no invalid file path in the database
         public async Task deleteAsync(int id)
         {
             var file = await _context.Files.FindAsync(id);
@@ -32,6 +31,7 @@ namespace SecureFileShare.Data.RepositoryPattern
             }
         }
 
+        //Getting all files for a specific user, including the owner information for each file
         public async Task<IEnumerable<Models.File>> getAllAsync(string id)
         {
             return await _context.Files
@@ -40,9 +40,10 @@ namespace SecureFileShare.Data.RepositoryPattern
                 .ToListAsync();
         }
 
-        public  Task<Models.File> getByIdAsync(int id)
+        //Getting a specific file by its ID, including the owner information for the file
+        public async Task<Models.File> getByIdAsync(int id)
         {
-            return _context.Files
+            return await _context.Files
                 .Include(u => u.Owner)
                 .FirstOrDefaultAsync(f => f.FileId == id);
         }
