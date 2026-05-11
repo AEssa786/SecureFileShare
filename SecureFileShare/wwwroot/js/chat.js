@@ -58,22 +58,8 @@ $(document).ready(function () {
                 // Add each message to the chat box, styling differently if it's from the current user or another user
                 // Also format the timestamp to only show hours and minutes
                 data.forEach(msg => {
-                    const message = document.createElement("div");
-                    if (msg.senderId === document.getElementById("chats").dataset.userId) {
-                        message.classList.add("my-message");
-                    }
-                    else {
-                        message.classList.add("other-message");
-                    }
-                    message.textContent = `${msg.content} (${new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false
-                    })})`;
-                    messagesContainer.appendChild(message);
+                    appendMessage(msg);
                 });
-                const container = document.getElementById("messages");
-                container.scrollTop = container.scrollHeight;
             });
             
         }
@@ -115,35 +101,7 @@ $(document).ready(function () {
 
         if (isFromCurrentUser || isFromCurrentChatPartner) {
             console.log("Appending message to active chat window...");
-            const messageDiv = document.createElement("div");
-            messageDiv.classList.add(isFromCurrentUser ? "my-message" : "other-message");
-
-            const time = new Date(msg.timestamp).toLocaleTimeString([], {
-                hour: '2-digit', minute: '2-digit', hour12: false
-            });
-
-            const textSpan = document.createElement("span");
-
-            if (msg.fileURL) {
-                const link = document.createElement("a");
-                link.href = msg.fileURL;
-                link.target = "_blank";
-                link.textContent = `${msg.content} (${time})`;
-                link.style.color = "inherit"; // Keep your chat styling
-                messageDiv.appendChild(link);
-                console.log("Message contains file URL, displaying as link:", msg.fileURL);
-            } else {
-                console.log("No file URL, displaying content as text:", msg.content);
-                textSpan.textContent = msg.content;
-                messageDiv.appendChild(textSpan);
-            }
-
-            const timeNode = document.createTextNode(` (${time})`);
-            messageDiv.appendChild(timeNode);
-
-            const container = document.getElementById("messages");
-            container.appendChild(messageDiv);
-            container.scrollTop = container.scrollHeight;
+            appendMessage(msg);
         }
         else {
             console.log("Background message! Applying unread class to:", existingUserLi);
@@ -174,22 +132,8 @@ $(document).ready(function () {
                 const messagesContainer = document.getElementById("messages");
                 messagesContainer.innerHTML = ""; // Clear old messages
                 data.forEach(msg => {
-                    const message = document.createElement("div");
-                    if (msg.senderId === document.getElementById("chats").dataset.userId) {
-                        message.classList.add("my-message");
-                    }
-                    else {
-                        message.classList.add("other-message");
-                    }
-                    message.textContent = `${msg.content} (${new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false
-                    })})`;
-                    messagesContainer.appendChild(message);
+                    appendMessage(msg);
                 });
-                const container = document.getElementById("messages");
-                container.scrollTop = container.scrollHeight;
             });
             
         }
