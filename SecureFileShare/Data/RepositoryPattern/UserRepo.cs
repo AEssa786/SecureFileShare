@@ -32,9 +32,9 @@ namespace SecureFileShare.Data.RepositoryPattern
                 .ToListAsync();
         }
 
-        public Task<ApplicationUser> getUserByIdAsync(string id)
+        public async Task<ApplicationUser> getUserByIdAsync(string id)
         {
-            throw new NotImplementedException();
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
 
         // This method performs a search for users based on a query string, checking if the query is contained in the

@@ -1,4 +1,5 @@
-﻿using SecureFileShare.Models;
+﻿using SecureFileShare.Data.DataTransferObjects;
+using SecureFileShare.Models;
 
 namespace SecureFileShare.Data.RepositoryPattern
 {
@@ -6,7 +7,9 @@ namespace SecureFileShare.Data.RepositoryPattern
     {
 
         Task<IEnumerable<Message>> getAllAsync(string id);
-        Task<IEnumerable<Message>> loadHistoryAsync(string senderId, string recipientId);
+        Task<IEnumerable<ChatDTO>> loadHistoryAsync(string senderId, string recipientId);
+        Task AddMessageAsync(Message message);
+        Task AddAttachmentAsync(MessageAttachment attachment);
 
     }
 }

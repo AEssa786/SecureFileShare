@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SecureFileShare.Models
 {
     public class MessageAttachment
     {
-
+        [Key]
         public int AttachmentId{ get; set; }
         public int MessageId { get; set; }
         public int FileId{ get; set; }

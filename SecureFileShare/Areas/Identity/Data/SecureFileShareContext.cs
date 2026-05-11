@@ -16,7 +16,8 @@ public class SecureFileShareContext : IdentityDbContext<ApplicationUser>
     public DbSet<Models.File> Files { get; set; }
     public DbSet<Models.FileShare> FileShares { get; set; }
     public DbSet<Message> Messages { get; set; }
-   
+    public DbSet<MessageAttachment> MessageAttachments { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

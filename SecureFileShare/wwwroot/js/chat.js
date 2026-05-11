@@ -72,8 +72,10 @@ $(document).ready(function () {
                     })})`;
                     messagesContainer.appendChild(message);
                 });
+                const container = document.getElementById("messages");
+                container.scrollTop = container.scrollHeight;
             });
-
+            
         }
     });
 
@@ -83,44 +85,71 @@ $(document).ready(function () {
         .build();
 
     // Listen for incoming messages
-    connection.on("ReceiveMessage", (senderId, senderName, content, timestamp) => {
-        const currentUserId = document.getElementById("chats").dataset.userId;
-        const chatWithId = window.currentRecipientId;
+    connection.on("ReceiveMessage", (msg) => {
+        console.log("Raw Message from Hub:", msg);
 
-        const isFromCurrentRecipient = senderId === chatWithId;
-        const isFromCurrentUser = senderId === currentUserId && chatWithId;
+        const currentUserId = document.getElementById("chats").dataset.userId.toLowerCase();
+        const chatWithId = (window.currentRecipientId || "").toLowerCase();
+        const msgSenderId = msg.senderId.toLowerCase();
 
-        //Add sender to chal list if they are not there (new conversations)
-        if (senderId != currentUserId && !document.querySelector(`#chatUsers li[data-user-id="${senderId}"]`)) {
-            const newUserLi = document.createElement("li");
-            newUserLi.dataset.userId = senderId;
-            newUserLi.classList.add("chatUser");
-            newUserLi.textContent = senderName;
-            document.getElementById("chatUsers").appendChild(newUserLi);
+        console.log(`Comparing: Sender(${msgSenderId}) | Me(${currentUserId}) | ActiveChat(${chatWithId})`);
+
+        const isFromCurrentUser = msgSenderId === currentUserId;
+        const isFromCurrentChatPartner = msgSenderId === chatWithId;
+
+        let existingUserLi = null;
+        document.querySelectorAll("#chatUsers li").forEach(li => {
+            if (li.dataset.userId && li.dataset.userId.toLowerCase() === msgSenderId) {
+                existingUserLi = li;
+            }
+        });
+
+        if (!isFromCurrentUser && !existingUserLi) {
+            console.log("New user detected, adding to sidebar...");
+            existingUserLi = document.createElement("li");
+            existingUserLi.dataset.userId = msg.senderId;
+            existingUserLi.classList.add("chatUser");
+            existingUserLi.textContent = msg.senderName;
+            document.getElementById("chatUsers").appendChild(existingUserLi);
         }
 
-        //Only add new messages to the chat if they are from the currently involved users
-        if (isFromCurrentRecipient || isFromCurrentUser) {
-            const message = document.createElement("div");
+        if (isFromCurrentUser || isFromCurrentChatPartner) {
+            console.log("Appending message to active chat window...");
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add(isFromCurrentUser ? "my-message" : "other-message");
 
-            // Style message differently if it's from the current user or another user
-            if (senderId === document.getElementById("chats").dataset.userId) {
-                message.classList.add("my-message");
+            const time = new Date(msg.timestamp).toLocaleTimeString([], {
+                hour: '2-digit', minute: '2-digit', hour12: false
+            });
+
+            const textSpan = document.createElement("span");
+
+            if (msg.fileURL) {
+                const link = document.createElement("a");
+                link.href = msg.fileURL;
+                link.target = "_blank";
+                link.textContent = `${msg.content} (${time})`;
+                link.style.color = "inherit"; // Keep your chat styling
+                messageDiv.appendChild(link);
+                console.log("Message contains file URL, displaying as link:", msg.fileURL);
+            } else {
+                console.log("No file URL, displaying content as text:", msg.content);
+                textSpan.textContent = msg.content;
+                messageDiv.appendChild(textSpan);
             }
-            else {
-                message.classList.add("other-message");
-            }
-            message.textContent = `${content} (${new Date(timestamp).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            })})`;
-            document.getElementById("messages").appendChild(message);
+
+            const timeNode = document.createTextNode(` (${time})`);
+            messageDiv.appendChild(timeNode);
+
+            const container = document.getElementById("messages");
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
         }
         else {
-            alert("New message from " + senderName);
-            const li = document.querySelector(`#chatUsers li[data-user-id="${senderId}"]`);
-            if (li) li.classList.add("unread");
+            console.log("Background message! Applying unread class to:", existingUserLi);
+            if (existingUserLi) {
+                existingUserLi.classList.add("unread");
+            }
         }
     });
 
@@ -159,8 +188,10 @@ $(document).ready(function () {
                     })})`;
                     messagesContainer.appendChild(message);
                 });
+                const container = document.getElementById("messages");
+                container.scrollTop = container.scrollHeight;
             });
-
+            
         }
     });
 
@@ -171,7 +202,7 @@ $(document).ready(function () {
         const content = document.getElementById("messageInput").value;
         const recipientId = window.currentRecipientId; 
 
-        connection.invoke("SendMessage", senderId, recipientId, content)
+        connection.invoke("SendMessage", recipientId, content)
             .catch(err => console.error(err.toString()));
 
         document.getElementById("messageInput").value = "";
@@ -188,10 +219,88 @@ $(document).ready(function () {
 
     });
 
+    document.getElementById("uploadFileNew").addEventListener("click", function (e) {
+        e.preventDefault();
+        document.getElementById("hiddenFileInput").click();
+        openPopUp();
+    })
+
+    document.getElementById("hiddenFileInput").addEventListener("change", function () {
+
+        const file = this.files[0];
+        if (file) {
+            const recipientId = window.currentRecipientId;
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("recipientId", recipientId);
+
+            const input = document.getElementById("messageInput");
+            const originalPlaceholder = input.placeholder;
+            input.placeholder = "Uploading file...";
+            input.disabled = true;
+
+            $.ajax({
+                url: "/Chat/SendFile",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (ChatDTO) {
+                    console.log("File sent successfully");
+                },
+                error: function () {
+                    console.error("Error sending file");
+                },
+                complete: function () {
+                    document.getElementById("hiddenFileInput").value = "";
+                    input.placeholder = originalPlaceholder;
+                    input.disabled = false;
+                }
+            });
+        }
+
+    });
+
 });
 
 // Function to toggle the visibility of the pop-up
 function openPopUp() {
     var popUp = document.getElementById("popUp");
     popUp.classList.toggle("show");
+}
+
+function appendMessage(msg) {
+    const messagesContainer = document.getElementById("messages");
+    const currentUserId = document.getElementById("chats").dataset.userId.toLowerCase();
+
+    const messageDiv = document.createElement("div");
+    const isMe = msg.senderId.toLowerCase() === currentUserId;
+    messageDiv.classList.add(isMe ? "my-message" : "other-message");
+
+    const time = new Date(msg.timestamp).toLocaleTimeString([], {
+        hour: '2-digit', minute: '2-digit', hour12: false
+    });
+
+    // Check for FileURL (C# case) or fileURL (JSON case)
+    const url = msg.fileURL || msg.fileUrl;
+
+    if (url) {
+        const link = document.createElement("a");
+        link.href = url;
+        link.target = "_blank";
+        link.textContent = msg.content;
+        link.style.color = "inherit";
+        messageDiv.appendChild(link);
+    } else {
+        const textSpan = document.createElement("span");
+        textSpan.textContent = msg.content;
+        messageDiv.appendChild(textSpan);
+    }
+
+    // Add timestamp
+    const timeNode = document.createTextNode(` (${time})`);
+    messageDiv.appendChild(timeNode);
+
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }

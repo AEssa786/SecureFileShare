@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SecureFileShare.Data;
 
@@ -11,9 +12,11 @@ using SecureFileShare.Data;
 namespace SecureFileShare.Migrations
 {
     [DbContext(typeof(SecureFileShareContext))]
-    partial class SecureFileShareContextModelSnapshot : ModelSnapshot
+    [Migration("20260511143029_messageAttachments")]
+    partial class messageAttachments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

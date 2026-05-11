@@ -304,7 +304,27 @@ td{
 
 .popUp.show {
     visibility: visible;
-    animation: fadeIn 0.3s;
+    animation: fadeIn 0.25s;
+}
+
+.popUp p {
+    margin: 0;
+    padding: 2px 5px;
+    border-radius: 3px;
+    color: #E5E5E5;
+    font-weight: bold;
+}
+
+.popUp a {
+    color: #E5E5E5;
+    text-decoration: none;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 1.1em;
+}
+
+.popUp a:hover {
+    background-color: #2563EB;
 }
 
 @-webkit-keyframes fadeIn {
