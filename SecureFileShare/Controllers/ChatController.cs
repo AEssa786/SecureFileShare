@@ -145,5 +145,64 @@ namespace SecureFileShare.Controllers
             return File(fileStream, "application/octet-stream", fileRecord.FileName);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetUserFiles()
+        {
+            var currentUser = _userManager.GetUserId(User);
+            var files = await _fileRepo.getAllAsync(currentUser);
+            
+            return Json(files.Select(f => new
+            {
+                fileId = f.FileId,
+                fileName = f.FileName,
+                fileSize = f.Size,
+                fileUrl = f.FilePath
+            }));
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SelectFile(int fileId, string recipientId) {
+
+            var senderId = _userManager.GetUserId(User);
+            var fileRecord = await _fileRepo.getByIdAsync(fileId);
+
+            if (fileRecord == null) { 
+                return NotFound();
+            }
+
+            var message = new Message
+            {
+                SenderId = senderId,
+                RecipientId = recipientId,
+                Content = $"[📎File] {fileRecord.FileName}",
+                Timestamp = DateTime.Now
+            };
+            await _chatRepository.AddMessageAsync(message);
+
+            var attachment = new MessageAttachment
+            {
+                MessageId = message.MessageId,
+                FileId = fileRecord.FileId
+            };
+            await _chatRepository.AddAttachmentAsync(attachment);
+
+            var sender = await _userRepository.getUserByIdAsync(senderId);
+
+            var chatDto = new ChatDTO
+            {
+                SenderId = senderId,
+                SenderName = $"{sender.FirstName} {sender.LastName}",
+                Content = message.Content,
+                Timestamp = message.Timestamp.ToString("o"),
+                FileURL = $"/Chat/DownloadFile?fileId={fileRecord.FileId}"
+            };
+
+            await _hubContext.Clients.User(recipientId).SendAsync("ReceiveMessage", chatDto);
+            await _hubContext.Clients.User(senderId).SendAsync("ReceiveMessage", chatDto);
+            return Json(chatDto);
+
+        }
+
     }
 }

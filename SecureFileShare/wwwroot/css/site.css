@@ -323,9 +323,53 @@ td{
     font-size: 1.1em;
 }
 
-.popUp a:hover {
-    background-color: #2563EB;
+#existingFilesContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: fit-content;
+    height: 200px;
 }
+
+#existingFiles {
+    overflow-y: auto;
+    margin: 5px auto;
+    color: #E5E5E5;
+    list-style-type: none;
+    padding: 0;
+}
+
+.file-option {
+    border: solid 1px #A1A1A1;
+    background-color: #2563EB;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 1.1em;
+}
+
+    .file-option:hover {
+        background-color: #9F7AEA;
+        cursor: pointer;
+    }
+
+#uploadFileNew {
+    border: solid 1px #A1A1A1;
+    background-color: #2563EB;
+    padding: 2px 5px;
+    width: fit-content; 
+    border-radius: 8px;
+    font-size: 1.1em;
+    margin: 2px auto;
+}
+
+    #uploadFileNew:hover {
+        background-color: #9F7AEA;
+        cursor: pointer;
+    }
+
+    .popUp a:hover {
+        background-color: #2563EB;
+    }
 
 @-webkit-keyframes fadeIn {
     from {opacity: 0;} 

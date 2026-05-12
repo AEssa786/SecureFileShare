@@ -159,7 +159,6 @@ $(document).ready(function () {
         if (event.key === "Enter") {
             document.getElementById("sendMessage").click();
         }
-        
 
     });
 
@@ -207,10 +206,55 @@ $(document).ready(function () {
 
 });
 
+
+function loadUserFiles() {
+    var fileList = document.getElementById("existingFiles");
+
+    fileList.innerHTML = "<li>Loading...</li>"; // Clear existing list
+
+    $.get("/Chat/GetUserFiles", function (data) {
+        fileList.innerHTML = ""; // Clear loading message
+        data.forEach(file => {
+            const fileItem = document.createElement("li");
+            fileItem.classList.add("file-option");
+            fileItem.textContent = `${file.fileName}`;
+
+            fileItem.onclick = function () {
+                console.log(`File ID = ${file.fileId}`)
+                console.log(`File URL = ${file.fileUrl}`)
+                shareExistingFile(file.fileId);
+                openPopUp();
+            }
+
+            fileList.appendChild(fileItem);
+        })
+
+    });
+}
+
+function shareExistingFile(fileId) {
+    const recipientId = window.currentRecipientId;
+
+    if (!recipientId) {
+        alert("Please select a chat partner before sharing a file.");
+        return;
+    }
+
+    $.post("/Chat/SelectFile", { fileId: fileId, recipientId: recipientId }, function (ChatDTO) {
+        console.log("File shared successfully");
+    }).fail(function (errorThrown) {
+        console.error(`Error sharing file ${errorThrown}`);
+    });
+
+}
+
 // Function to toggle the visibility of the pop-up
 function openPopUp() {
     var popUp = document.getElementById("popUp");
     popUp.classList.toggle("show");
+        if (popUp.classList.contains("show")) {
+            loadUserFiles();
+        }
 }
 
 function appendMessage(msg) {
