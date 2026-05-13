@@ -143,5 +143,35 @@ namespace SecureFileShare.Controllers
             return Json(users);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> edit(int id)
+        {
+            var file = await _fileRepository.getByIdAsync(id);
+            if (file == null || file.OwnerId != _userManager.GetUserId(User))
+            {
+                return NotFound();
+            }
+            return View(file);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> edit(int id, string newName)
+        {
+            var file = await _fileRepository.getByIdAsync(id);
+            if (file == null || file.OwnerId != _userManager.GetUserId(User))
+            {
+                return NotFound();
+            }
+            if (string.IsNullOrEmpty(newName))
+            {
+                ModelState.AddModelError(string.Empty, "File name cannot be empty.");
+                return View(file);
+            }
+            await _fileRepository.updateAsync(id, newName);
+            return RedirectToAction("AllFiles");
+        }
+
+        // TODO: Implement File Searching and Filtering
+
     }
 }

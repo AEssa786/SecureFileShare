@@ -2,6 +2,7 @@
 
 <html lang="en">
     <head>
+    <meta charset="utf-8" />
         <title>All Files - SecureFileShare</title>
         <link rel="stylesheet" href="~/css/site.css" />
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -25,14 +26,14 @@
                     @foreach (var file in Model)
                     {
                         <tr>
-                            <td>@file.FileName</td>
+                            <td>@file.FileName <a asp-action="edit" asp-route-id="@file.FileId">✏️</a></td>
                             <td>@(file.Size / 1024) KB</td>
                             <td>@file.UploadDate.ToString("dd-MM-yyyy HH:mm")</td>
                             <td>
-                                <a asp-action="Download" asp-route-id="@file.FileId" class="btn btn-sm btn-success">⬇️</a>
+                            <a asp-action="Download" asp-route-id="@file.FileId" class="btn btn-sm btn-success">💾</a>
                                 <a asp-action="Delete" asp-route-id="@file.FileId" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this file?');">🗑️</a>
                                 <div class="shareButtonWrapper">
-                                    <a id="shareButton" href="javascript:void(0)" onclick="openPopUp(this)" data-file-id="@file.FileId" class="btn btn-sm btn-primary">📨</a>
+                                <a id="shareButton" href="javascript:void(0)" onclick="openPopUp(this)" data-file-id="@file.FileId" class="btn btn-sm btn-primary">ᯓ➤</a>
                                     <div id="popUp" class="popUp">
                                         <p>Share Menu</p>
                                         <div id="search">

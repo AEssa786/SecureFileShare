@@ -47,5 +47,16 @@ namespace SecureFileShare.Data.RepositoryPattern
                 .Include(u => u.Owner)
                 .FirstOrDefaultAsync(f => f.FileId == id);
         }
+
+        public async Task updateAsync(int id, string newName)
+        {
+            var file = await _context.Files.FindAsync(id);
+
+            if (file != null && !string.IsNullOrEmpty(newName)) { 
+                file.FileName = newName + Path.GetExtension(file.FileName);
+                await _context.SaveChangesAsync();
+            }
+            
+        }
     }
 }

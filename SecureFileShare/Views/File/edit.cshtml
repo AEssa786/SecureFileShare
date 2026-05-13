@@ -1,0 +1,23 @@
+﻿@model File
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Edit File - SecureFileShare</title>
+        <link rel="stylesheet" href="~/css/site.css" />
+    </head>
+    <body>
+        <div id="editFile">
+            <h1>Edit File</h1>
+            <form asp-action="edit" method="post">
+                <input type="hidden" asp-for="FileId" />
+                <div class="form-group">
+                    <label asp-for="FileName">File Name</label>
+                    <input type="text" asp-for="FileName" class="form-control" name="newName"/>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a asp-action="AllFiles" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </body>
+</html>
