@@ -146,8 +146,8 @@ td{
 }
 
 #chats {
-    width: 900px;
-    height: 600px;
+    width: 1200px;
+    height: 800px;
     margin: 80px auto;
 }
 
@@ -162,11 +162,11 @@ td{
     flex-direction: column;
     border: 1px solid #A1A1A1;
     height:600px;
-    width: 675px;
+    width: 900px;
     border-radius: 5px;
     padding: 10px;
     grid-row: 1/ span 2;
-    grid-column: 2;
+    grid-column: 2; 
 }
 
 #chatList {
@@ -273,25 +273,31 @@ td{
     justify-content: center;
 }
 
-    .fileBox .popUp {
-        visibility: hidden;
-        position: absolute;
-        bottom: 150%;
-        left: 50%;
-        transform: translateX(-50%);
-        text-align: center;
-        background-color: #9F7AEA;
-        border: 1px solid #A1A1A1;
-        border-radius: 5px;
-        padding: 10px;
-        z-index: 10;
-        min-width: 100px;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
+.shareButtonWrapper{
+    position: relative;
+    display: inline-block;
+}
 
-        .fileBox .popUp::after {
+.popUp {
+    visibility: hidden;
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    background-color: #9F7AEA;
+    border: 1px solid #A1A1A1;
+    border-radius: 5px;
+    padding: 10px;
+    z-index: 9999;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.5);
+}
+
+        .popUp::after {
             content: "";
             position: absolute;
             top: 100%;

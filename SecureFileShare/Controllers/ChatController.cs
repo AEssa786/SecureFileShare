@@ -204,5 +204,7 @@ namespace SecureFileShare.Controllers
 
         }
 
+        // TODO: Implement Image Uploading and Display in Chat, Seperate from files.
+
     }
 }

@@ -12,14 +12,18 @@ namespace SecureFileShare.Models
         public int SharedFileId { get; set; }
         [Required]
         public string SharedWithId { get; set; }
-        public DateTime ShareDate { get; set; } = DateTime.UtcNow;
         [Required]
-        public string PermissionType{ get; set; }
-        public DateTime? ExpiryDate{ get; set; }
+        public string SharedFromId{ get; set; }
+        public DateTime ShareDate { get; set; } = DateTime.Now;
+        [Required]
+        public string PermissionType{ get; set; } = "Read"; // Default to read-only permission, can be extended to allow different permission types
+        public DateTime? ExpiryDate{ get; set; } = null; // Optional expiry date for the share, can be null for no expiry
         [ForeignKey("SharedFileId")]
         public File SharedFile { get; set; }
         [ForeignKey("SharedWithId")]
         public ApplicationUser SharedWith { get; set; }
+        [ForeignKey("SharedFromId")]
+        public ApplicationUser SharedFrom { get; set; }
 
     }
 }

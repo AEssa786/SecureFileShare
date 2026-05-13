@@ -25,6 +25,7 @@ namespace SecureFileShare
             builder.Services.AddScoped<IFileRepository, FileRepo>();
             builder.Services.AddScoped<IChatRepository, ChatRepo>();
             builder.Services.AddScoped<IUserRepository, UserRepo>();
+            builder.Services.AddScoped<IFileShareRepository, FileShareRepo>();
             builder.Services.AddScoped<IFileService, FileService>();
             builder.Services.AddScoped<IChatService, ChatService>();
 

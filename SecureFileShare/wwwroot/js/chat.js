@@ -257,6 +257,7 @@ function openPopUp() {
         }
 }
 
+
 function appendMessage(msg) {
     const messagesContainer = document.getElementById("messages");
     const currentUserId = document.getElementById("chats").dataset.userId.toLowerCase();

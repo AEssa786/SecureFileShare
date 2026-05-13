@@ -12,12 +12,21 @@ namespace SecureFileShare.Controllers
         private readonly IFileRepository _fileRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IFileService _fileService;
+        private readonly IFileShareRepository _fileShareRepository;
+        private readonly IUserRepository _userRepository;
 
-        public FileController(IFileRepository fileRepository, UserManager<ApplicationUser> userManager, IFileService fileService)
+        public FileController(
+            IFileRepository fileRepository, 
+            UserManager<ApplicationUser> userManager, 
+            IFileService fileService,
+            IFileShareRepository fileShareRepository,
+            IUserRepository userRepository)
         {
             _userManager = userManager;
             _fileRepository = fileRepository;
             _fileService = fileService;
+            _fileShareRepository = fileShareRepository;
+            _userRepository = userRepository;
         }
 
         //Fetch all files belonging to the currently logged in user and display them in the AllFiles view
@@ -95,6 +104,43 @@ namespace SecureFileShare.Controllers
             _fileService.DeleteFile(file.FilePath).Wait();
             _fileRepository.deleteAsync(id).Wait();
             return RedirectToAction("AllFiles");
+        }
+
+        public async Task<IActionResult> Share(int fileId, string recipientId)
+        {
+            var file = await _fileRepository.getByIdAsync(fileId);
+            var userId = _userManager.GetUserId(User);
+
+            if (file == null || file.OwnerId != userId)
+            {
+                return Json(new { success = false, message = "File not found or access denied." });
+            }
+
+            try
+            {
+                await _fileShareRepository.shareFile(file, recipientId, userId);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult searchUsers(string query)
+        {
+            // Call the repository method to search for users based on the query string, which checks against username, first name, and last name.
+            var users = _userRepository.searchUsersAsync(query).Result.Select(u => new
+            {
+                u.Id,
+                u.UserName,
+                u.FirstName,
+                u.LastName
+            });
+
+            // Return the list of matching users as a JSON response to the client-side AJAX call, which will then display the results in the UI.
+            return Json(users);
         }
 
     }
