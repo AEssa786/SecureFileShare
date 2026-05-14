@@ -1,5 +1,9 @@
 ﻿
 let currentFileId = null;
+let currentSearch = "";
+let currentSort = "FileName";
+let currentDir = "asc";
+
 function openPopUp(buttonElement) {
     currentFileId = buttonElement.dataset.fileId;
     console.log("Setting active file ID to: " + currentFileId);
@@ -16,6 +20,12 @@ function openPopUp(buttonElement) {
     if (popUp.classList.contains("show")) {
         popUp.querySelector("#searchInput").focus();
     }
+}
+
+function updateTable() {
+    $.get("/File/GetFilesPartial", { search: currentSearch, sortColumn: currentSort, direction: currentDir }, function (data) {
+        $("#fileTableBody").html(data);
+    });
 }
 
 $(document).ready(function () {
@@ -68,6 +78,25 @@ $(document).ready(function () {
             });
 
         }
+    });
+
+    $(".sortable").on("click", function () {
+        const column = $(this).data("column");
+        if (currentSort === column) {
+            currentDir = currentDir === "asc" ? "desc" : "asc";
+        } else {
+            currentSort = column;
+            currentDir = "asc";
+        }
+
+        $(".sortable span").text(""); // Clear all sort indicators
+        $("#icon-" + column).text(currentDir === "asc" ? "▲" : "▼"); // Set indicator for current column
+        updateTable();
+    });
+
+    $("#fileSearch").on("keyup", function () {
+        currentSearch = $(this).val();
+        updateTable();
     });
 
 });

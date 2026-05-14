@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Mono.TextTemplating;
 using SecureFileShare.Data.RepositoryPattern;
 using SecureFileShare.Models;
 using SecureFileShare.Services;
@@ -36,6 +37,30 @@ namespace SecureFileShare.Controllers
             var userId = _userManager.GetUserId(User);
             var files = await _fileRepository.getAllAsync(userId);
             return View(files);
+        }
+
+        public async Task<IActionResult> GetFilesPartial(string search = "", string sortColumn = "FileName", string direction = "asc")
+        {
+            var userId = _userManager.GetUserId(User);
+            var files = await _fileRepository.getAllAsync(userId);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                files = files.Where(f => f.FileName.Contains(search, StringComparison.OrdinalIgnoreCase));
+            }
+
+            files = (sortColumn, direction) switch
+            {
+                ("FileName", "asc") => files.OrderBy(f => f.FileName),
+                ("FileName", "desc") => files.OrderByDescending(f => f.FileName),
+                ("Size", "asc") => files.OrderBy(f => f.Size),
+                ("Size", "desc") => files.OrderByDescending(f => f.Size),
+                ("UploadDate", "asc") => files.OrderBy(f => f.UploadDate),
+                ("UploadDate", "desc") => files.OrderByDescending(f => f.UploadDate),
+                _ => files
+            };
+
+            return PartialView(files.ToList());
         }
 
         //Display the file upload form to the user
@@ -170,8 +195,6 @@ namespace SecureFileShare.Controllers
             await _fileRepository.updateAsync(id, newName);
             return RedirectToAction("AllFiles");
         }
-
-        // TODO: Implement File Searching and Filtering
 
     }
 }
