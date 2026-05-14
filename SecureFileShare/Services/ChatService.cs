@@ -36,9 +36,41 @@ namespace SecureFileShare.Services
                 SenderId = senderId,
                 Content = content,
                 Timestamp = msg.Timestamp.ToString("o"),
-                SenderName = $"{sender.FirstName} {sender.LastName}"
+                SenderName = $"{sender.FirstName} {sender.LastName}",
+                messageId = msg.MessageId,
+                isRead = msg.IsRead
             };
 
         }
+
+        public async Task MarkAllRead(string userId, string otherId)
+        {
+            var messages = await _chatRepository.getUnreadMessagesAsync(userId, otherId);
+
+            if (messages != null)
+            {
+                foreach (var message in messages)
+                {
+                    message.IsRead = true;
+                }
+                await _chatRepository.saveChanges();
+            }
+
+        }
+
+        public async Task<string> MarkMessageAsRead(int messageId)
+        {
+            var message = await _chatRepository.getById(messageId);
+            if (message != null)
+            {
+                message.IsRead = true;
+                await _chatRepository.saveChanges();
+                return message.SenderId;
+            }
+            return null;
+        }
+
+        
+
     }
 }

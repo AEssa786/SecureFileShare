@@ -24,5 +24,20 @@ namespace SecureFileShare.Data.SignalR
             await Clients.User(senderId).SendAsync("ReceiveMessage", messageDto);
         }
 
+        public async Task MarkAsRead(int messageId)
+        {
+            if (messageId > 0) { 
+                string senderId = await _chatService.MarkMessageAsRead(messageId);
+                await Clients.User(senderId).SendAsync("MessageRead", messageId);
+            }
+        }
+
+        public async Task MarkAllRead(string otherUserId)
+        {
+            var userId = Context.UserIdentifier;
+            await _chatService.MarkAllRead(userId, otherUserId);
+            await Clients.User(otherUserId).SendAsync("AllMessagesRead", userId);
+        }
+
     }
 }

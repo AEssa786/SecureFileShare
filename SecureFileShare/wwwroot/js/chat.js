@@ -60,6 +60,7 @@ $(document).ready(function () {
                 data.forEach(msg => {
                     appendMessage(msg);
                 });
+                connection.invoke("MarkAllRead", recipientId).catch(err => console.error(err.toString()));
             });
             
         }
@@ -102,12 +103,29 @@ $(document).ready(function () {
         if (isFromCurrentUser || isFromCurrentChatPartner) {
             console.log("Appending message to active chat window...");
             appendMessage(msg);
+            if (isFromCurrentChatPartner) {
+                connection.invoke("MarkAsRead", msg.messageId || msg.MessageId)
+                    .catch(err => console.error(err.toString()));
+            }
         }
         else {
             console.log("Background message! Applying unread class to:", existingUserLi);
             if (existingUserLi) {
                 existingUserLi.classList.add("unread");
             }
+        }
+    });
+
+    connection.on("MessageRead", (messageId) => {
+        const tick = document.querySelector(`[data-msg-id="${messageId}"] .status-tick`);
+        if (tick) {
+            tick.textContent = "✓✓";
+        }
+    });
+
+    connection.on("AllMessagesRead", (userId) => {
+        if (window.currentRecipientId && window.currentRecipientId.toLowerCase() === userId.toLowerCase()) {
+            document.querySelectorAll(".status-tick").forEach(tick => tick.textContent = " ✓✓");
         }
     });
 
@@ -134,8 +152,8 @@ $(document).ready(function () {
                 data.forEach(msg => {
                     appendMessage(msg);
                 });
+                connection.invoke("MarkAllRead", recipientId).catch(err => console.error(err.toString()));
             });
-            
         }
     });
 
@@ -270,6 +288,8 @@ function appendMessage(msg) {
         hour: '2-digit', minute: '2-digit', hour12: false
     });
 
+    messageDiv.setAttribute("data-msg-id", msg.messageId || msg.MessageId);
+
     // Check for FileURL (C# case) or fileURL (JSON case)
     const url = msg.fileURL || msg.fileUrl;
 
@@ -284,6 +304,13 @@ function appendMessage(msg) {
         const textSpan = document.createElement("span");
         textSpan.textContent = msg.content;
         messageDiv.appendChild(textSpan);
+    }
+
+    if (isMe) {
+        const statusSpan = document.createElement("span");
+        statusSpan.classList.add("status-tick");
+        statusSpan.textContent = msg.isRead ? "✓✓" : "✓";
+        messageDiv.appendChild(statusSpan);
     }
 
     // Add timestamp

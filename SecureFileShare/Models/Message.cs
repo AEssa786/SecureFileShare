@@ -13,6 +13,7 @@ namespace SecureFileShare.Models
         public string RecipientId{ get; set; }
         public string Content { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
+        public bool IsRead { get; set; } = false;
         [ForeignKey("SenderId")]
         public virtual ApplicationUser Sender { get; set; }
         [ForeignKey("RecipientId")]

@@ -33,6 +33,18 @@ namespace SecureFileShare.Data.RepositoryPattern
                     .ToListAsync();
         }
 
+        public async Task<Message> getById(int id)
+        {
+            return await _context.Messages.FindAsync(id);
+        }
+
+        public async Task<IEnumerable<Message>> getUnreadMessagesAsync(string userId, string otherId)
+        {
+            return await _context.Messages
+                .Where(m => m.RecipientId == userId && m.SenderId == otherId && !m.IsRead)
+                .ToListAsync();
+        }
+
         // This method retrieves the chat history between two users, identified by their user IDs.
         // It fetches messages where one user is the sender and the other is the recipient, and orders the messages
         // by their timestamp to maintain the conversation flow.
@@ -47,7 +59,7 @@ namespace SecureFileShare.Data.RepositoryPattern
                     SenderId = m.SenderId,
                     Content = m.Content,
                     Timestamp = m.Timestamp.ToString("o"), // ISO format for easy JS parsing
-                                                           // We look into the Attachments table to find a matching FileId for this message
+                    isRead = m.IsRead,                                       // We look into the Attachments table to find a matching FileId for this message
                     FileURL = _context.MessageAttachments
                     .Where(a => a.MessageId == m.MessageId)
                     .Select(a => $"/Chat/DownloadFile?fileId={a.FileId}")
@@ -56,7 +68,14 @@ namespace SecureFileShare.Data.RepositoryPattern
                 .ToListAsync();
         }
 
-
-
+        public async Task UpdateMessage(Message message)
+        {
+            _context.Messages.Update(message);
+            await _context.SaveChangesAsync();
+        }
+        public async Task saveChanges()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

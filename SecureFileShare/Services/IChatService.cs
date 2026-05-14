@@ -6,6 +6,8 @@ namespace SecureFileShare.Services
     {
 
         Task<ChatDTO> CreateAndSaveMessage(string senderId, string recipientId, string content);
+        Task<string> MarkMessageAsRead(int messageId);
+        Task MarkAllRead(string userId, string otherId);
 
     }
 }

@@ -8,6 +8,8 @@
         public string Content { get; set; }
         public string? FileURL { get; set; } = null;
         public string Timestamp { get; set; }
+        public int messageId { get; set; }
+        public bool isRead { get; set; }
 
     }
 }
