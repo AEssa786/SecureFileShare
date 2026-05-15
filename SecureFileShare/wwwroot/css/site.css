@@ -392,3 +392,17 @@ td{
     margin-left: 5px;
     color: #888; /* Gray for single tick */
 }
+
+.chat-image {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 5px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+    .chat-image:hover {
+        transform: scale(1.02);
+    }

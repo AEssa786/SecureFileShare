@@ -8,6 +8,7 @@ using SecureFileShare.Models;
 using SecureFileShare.Services;
 using SecureFileShare.Data.SignalR;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace SecureFileShare.Controllers
 {
@@ -88,7 +89,7 @@ namespace SecureFileShare.Controllers
             if (_fileService.fileCheck(file, file.FileName)){
                 var fileName = Path.GetFileNameWithoutExtension(file.FileName);
                 var filePath = await _fileService.UploadFileAsync(file, fileName);
-                var trueFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", filePath);
+
                 var message = new Message
                 {
                     SenderId = senderId,
@@ -116,12 +117,17 @@ namespace SecureFileShare.Controllers
 
                 var sender = await _userRepository.getUserByIdAsync(senderId);
 
-                var chatDto = new ChatDTO { 
+                var extension = Path.GetExtension(file.FileName).ToLower();
+                bool isImage = extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif";
+
+                var chatDto = new ChatDTO
+                {
                     SenderId = senderId,
                     SenderName = $"{sender.FirstName} {sender.LastName}",
                     Content = message.Content,
                     Timestamp = message.Timestamp.ToString("o"),
-                    FileURL = $"/Chat/DownloadFile?fileId={fileRecord.FileId}"
+                    FileURL = $"/Chat/DownloadFile?fileId={fileRecord.FileId}",
+                    isImage = isImage
                 };
 
                 await _hubContext.Clients.User(recipientId).SendAsync("ReceiveMessage", chatDto);
@@ -141,7 +147,24 @@ namespace SecureFileShare.Controllers
             {
                 return NotFound();
             }
+
             var fileStream = _fileService.DownloadFile(fileRecord);
+
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(fileRecord.FileName, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            var extension = Path.GetExtension(fileRecord.FileName).ToLower();
+            bool isImage = extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif";
+
+            if (isImage)
+            {
+                Response.Headers.Append("Content-Disposition", $"inline; filename=\"{Uri.EscapeDataString(fileRecord.FileName)}\"");
+                return File(fileStream, contentType);
+            }
+
             return File(fileStream, "application/octet-stream", fileRecord.FileName);
         }
 
@@ -189,13 +212,17 @@ namespace SecureFileShare.Controllers
 
             var sender = await _userRepository.getUserByIdAsync(senderId);
 
+            var extension = Path.GetExtension(fileRecord.FileName).ToLower();
+            bool isImage = extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif";
+
             var chatDto = new ChatDTO
             {
                 SenderId = senderId,
                 SenderName = $"{sender.FirstName} {sender.LastName}",
                 Content = message.Content,
                 Timestamp = message.Timestamp.ToString("o"),
-                FileURL = $"/Chat/DownloadFile?fileId={fileRecord.FileId}"
+                FileURL = $"/Chat/DownloadFile?fileId={fileRecord.FileId}",
+                isImage = isImage
             };
 
             await _hubContext.Clients.User(recipientId).SendAsync("ReceiveMessage", chatDto);
@@ -203,8 +230,6 @@ namespace SecureFileShare.Controllers
             return Json(chatDto);
 
         }
-
-        // TODO: Implement Image Uploading and Display in Chat, Seperate from files.
 
     }
 }

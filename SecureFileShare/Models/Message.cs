@@ -18,7 +18,5 @@ namespace SecureFileShare.Models
         public virtual ApplicationUser Sender { get; set; }
         [ForeignKey("RecipientId")]
         public virtual ApplicationUser Recipient { get; set; }
-        // TODO: Add Read Status to messages to persist the unread notification badge on the chat page until the user reads the message
-        // TODO: Add visual element to read status on the chat page, such as a checkmark or different background color for read vs unread messages
     }
 }

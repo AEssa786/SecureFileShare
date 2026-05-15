@@ -10,6 +10,7 @@
         public string Timestamp { get; set; }
         public int messageId { get; set; }
         public bool isRead { get; set; }
+        public bool isImage { get; set; }
 
     }
 }

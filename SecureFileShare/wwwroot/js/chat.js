@@ -292,14 +292,26 @@ function appendMessage(msg) {
 
     // Check for FileURL (C# case) or fileURL (JSON case)
     const url = msg.fileURL || msg.fileUrl;
+    const isImage = msg.isImage || msg.IsImage; // Handle both C# and JSON cases
 
     if (url) {
-        const link = document.createElement("a");
-        link.href = url;
-        link.target = "_blank";
-        link.textContent = msg.content;
-        link.style.color = "inherit";
-        messageDiv.appendChild(link);
+        if (isImage) {
+            const img = document.createElement("img");
+            img.src = url;
+            img.alt = "Shared Image";
+            img.classList.add("chat-image");
+            img.onclick = () => window.open(url, "_blank");
+            messageDiv.appendChild(img);
+        }
+        else {
+            const link = document.createElement("a");
+            link.href = url;
+            link.target = "_blank";
+            link.textContent = msg.content;
+            link.style.color = "inherit";
+            messageDiv.appendChild(link);
+        }
+        
     } else {
         const textSpan = document.createElement("span");
         textSpan.textContent = msg.content;

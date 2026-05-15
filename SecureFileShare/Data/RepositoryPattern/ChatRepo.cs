@@ -63,7 +63,13 @@ namespace SecureFileShare.Data.RepositoryPattern
                     FileURL = _context.MessageAttachments
                     .Where(a => a.MessageId == m.MessageId)
                     .Select(a => $"/Chat/DownloadFile?fileId={a.FileId}")
-                    .FirstOrDefault()
+                    .FirstOrDefault(),
+                    isImage = _context.MessageAttachments
+                    .Any(a => a.MessageId == m.MessageId && 
+                            (a.File.FileName.ToLower().EndsWith(".jpg") ||
+                             a.File.FileName.ToLower().EndsWith(".jpeg") ||
+                             a.File.FileName.ToLower().EndsWith(".png") ||
+                             a.File.FileName.ToLower().EndsWith(".gif")))
                 })
                 .ToListAsync();
         }
